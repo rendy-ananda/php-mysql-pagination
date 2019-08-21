@@ -1,27 +1,27 @@
 <?php
-// koneksi
-$conn = new mysqli('localhost', 'root', '', 'test_db');
+// connection
+$conn = new mysqli('localhost', 'root', '', 'pagination_db');
 
-// rumus pagination
-$jml_data_perhalaman    = 2; // jumlah data yg ingin ditampilkan perhalaman
-$jml_data               = ($conn->query("SELECT * FROM brg_1"))->num_rows; // menghitung jumlah data
-$jml_halaman            = ceil($jml_data / $jml_data_perhalaman); // ceil pembulatan ke nilai atas
-$halaman_aktif          = ( isset($_GET['page']) ) ? $_GET['page'] : 1; // if else || jika if true ? || jika if false/else :
-$awal_data              = ($jml_data_perhalaman * $halaman_aktif) - $jml_data_perhalaman;
+// calculation preparation for pagination
+$data_per_page    = 2; // the amount of data you want to display per page
+$amount_of_data   = ($conn->query("SELECT * FROM items"))->num_rows; // calculate the amount of data
+$number_of_page   = ceil($amount_of_data / $data_per_page); // ceil : rounding up value
+$active_page      = ( isset($_GET['page']) ) ? $_GET['page'] : 1; // if else
+$initial_data     = ($data_per_page * $active_page) - $data_per_page;
 
 
 
-// awal pagination
+// the beginning of the pagination
 
-// menuju link sebelumnya
-if ( $halaman_aktif > 1 ) {
-    echo '<a href="?page='.( $halaman_aktif - 1 ).'">&lt;</a> '; 
+// go to the previous link
+if ( $active_page > 1 ) {
+    echo '<a href="?page='.( $active_page - 1 ).'">&lt;</a> '; 
 }
 
 // pagination
-for ($i=1; $i <= $jml_halaman; $i++) { 
-    // validasi halaman aktif
-    if ( $i == $halaman_aktif ) {
+for ($i=1; $i <= $number_of_page; $i++) { 
+    // validation for active page
+    if ( $i == $active_page ) {
         $link = '<a href="?page='.$i.'" style="color:red">'.$i.'</a> ';
     }
     else {
@@ -31,26 +31,28 @@ for ($i=1; $i <= $jml_halaman; $i++) {
     echo $link;
 }
 
-// menuju link sebelumnya
-if ( $halaman_aktif <> $jml_halaman ) {
-    echo '<a href="?page='.( $halaman_aktif + 1 ).'">&gt;</a> '; 
+// go to the next link
+if ( $active_page <> $number_of_page ) {
+    echo '<a href="?page='.( $active_page + 1 ).'">&gt;</a> '; 
 }
-// akhir pagination
+// end of pagination
 
 
 
-// data tabel
-$result = $conn->query("SELECT * FROM brg_1 LIMIT $awal_data, $jml_data_perhalaman");
+// result data using LIMIT
+$result = $conn->query("SELECT * FROM items LIMIT $initial_data, $data_per_page");
 echo '
 <table>
-    <th>ID</th>
-    <th>BARANG</th>
+    <th>Id</th>
+    <th>Item</th>
+    <th>Price</th>
 ';
 while( $x = $result->fetch_object() ) {
     echo '
     <tr>
         <td>'.$x->id.'</td>
-        <td>'.$x->nama_brg.'</td>
+        <td>'.$x->item.'</td>
+        <td>'.$x->price.'</td>
     </tr>
     ';
 }
